@@ -1,0 +1,207 @@
+FROM debian:bullseye-slim 
+
+ENV RUSTUP_HOME=/usr/local/rustup \
+    CARGO_HOME=/usr/local/cargo \
+    PATH=/usr/local/cargo/bin:$PATH \
+    RUST_VERSION=1.74.1
+
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends \
+    procps \
+    ca-certificates \
+    gcc \
+    libc6-dev \
+    wget \
+    sudo \
+    ; \
+    dpkgArch="$(dpkg --print-architecture)"; \
+    case "${dpkgArch##*-}" in \
+    amd64) rustArch='x86_64-unknown-linux-gnu'; rustupSha256='0b2f6c8f85a3d02fde2efc0ced4657869d73fccfce59defb4e8d29233116e6db' ;; \
+    armhf) rustArch='armv7-unknown-linux-gnueabihf'; rustupSha256='f21c44b01678c645d8fbba1e55e4180a01ac5af2d38bcbd14aa665e0d96ed69a' ;; \
+    arm64) rustArch='aarch64-unknown-linux-gnu'; rustupSha256='673e336c81c65e6b16dcdede33f4cc9ed0f08bde1dbe7a935f113605292dc800' ;; \
+    i386) rustArch='i686-unknown-linux-gnu'; rustupSha256='e7b0f47557c1afcd86939b118cbcf7fb95a5d1d917bdd355157b63ca00fc4333' ;; \
+    *) echo >&2 "unsupported architecture: ${dpkgArch}"; exit 1 ;; \
+    esac; \
+    url="https://static.rust-lang.org/rustup/archive/1.26.0/${rustArch}/rustup-init"; \
+    wget "$url"; \
+    echo "${rustupSha256} *rustup-init" | sha256sum -c -; \
+    chmod +x rustup-init; \
+    ./rustup-init -y --no-modify-path --profile minimal --default-toolchain $RUST_VERSION --default-host ${rustArch}; \
+    rm rustup-init; \
+    chmod -R a+w $RUSTUP_HOME $CARGO_HOME; \
+    rustup --version; \
+    cargo --version; \
+    rustc --version; \
+    # apt-get remove -y --auto-remove \
+    # wget \
+    # sudo \
+    # ; \
+    rm -rf ls ;
+
+
+# FROM debian:bullseye-slim as app
+
+# RUN set -eux; \
+#    apt-get update; \
+#    apt-get install -y --no-install-recommends \
+#    procps \
+#    ca-certificates \
+#    gcc \
+#    libc6-dev \
+#    wget 
+
+
+# RUN mkdir -p /usr/local/cargo/bin
+# COPY --from=rust_installer /usr/local /usr/local
+
+# put rust path in bash shell
+RUN echo export PATH="\"$PATH:/usr/local/cargo/bin\"" >> /etc/profile
+RUN echo export PATH="\"$PATH:/usr/local/cargo/bin\"" >> /etc/bash.bashrc
+# for sh
+RUN echo PATH="\"$PATH:/usr/local/cargo/bin\"" >> /etc/environment
+
+
+ENV CARGO_HOME /usr/local/cargo
+ENV RUSTUP_HOME /usr/local/rustup
+# for sh
+ENV PATH /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/cargo/bin
+RUN chmod -R a+w $RUSTUP_HOME $CARGO_HOME; 
+
+# run_local_inside
+# 0. need  local user with sudo
+# define a USER
+# Environment variables for user
+ENV PUID='1000'
+ENV PGID='1000'
+ENV USER='user'
+
+# create user $USER
+RUN addgroup --gid "$PGID" "$USER" && \
+    adduser --gecos '' --disabled-password --uid "$PUID" --gid "$PGID" "$USER"
+# add $USER to sudo
+RUN mkdir -p /etc/sudoers.d 
+RUN echo "user ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/"$USER" \
+    && chmod 0440 /etc/sudoers.d/"$USER"
+
+
+
+# x downlaods
+RUN apt-get update && apt-get install -yqq xvfb \
+    adduser \
+    x11vnc \
+    bash \
+    vim \
+    htop \
+    sudo \
+    fluxbox \
+    x11-utils # for xdpyinfo \
+    bash \
+    vim \
+    terminus-font \
+    curl \
+    wget \
+    ca-certificates \
+    unzip \
+    # Chrome dependency Instalation \
+    # FROM HERE - https://github.com/Dmitry-Ostashev/testcafe-kubernetes-example/blob/main/Dockerfile \
+    fonts-liberation \
+    libasound2 \
+    libatk-bridge2.0-0 \
+    libatk1.0-0 \
+    libatspi2.0-0 \
+    libcups2 \
+    libdbus-1-3 \
+    libdrm2 \
+    libgbm1 \
+    libgtk-3-0 \
+    #    libgtk-4-1 \
+    libnspr4 \
+    libnss3 \
+    libwayland-client0 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxfixes3 \
+    libxkbcommon0 \
+    libxrandr2 \
+    xdg-utils \
+    libu2f-udev \
+    libvulkan1 \
+    gcc
+
+# Chrome install
+# RUN curl -vsSLO https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+# RUN curl -vsSLO https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb 
+RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+
+
+# chrome driver install
+# https://stackoverflow.com/questions/45323271/how-to-run-selenium-with-chrome-in-docker
+# RUN wget -O /tmp/chromedriver.zip http://chromedriver.storage.googleapis.com/`curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE`/chromedriver_linux64.zip
+# RUN unzip /tmp/chromedriver.zip chromedriver -d /usr/local/bin/
+
+# RUN wget -O /tmp/chromedriver.zip http://chromedriver.storage.googleapis.com//chromedriver_linux64.zip
+# RUN wget -O /tmp/chromedriver.zip http://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip
+ADD download/chromedriver.zip /home/user
+RUN ls -l /home/user
+RUN ls -l /usr/bin
+# RUN /usr/bin/unzip /home/user/chromedriver.zip 
+
+RUN apt upgrade -yqq
+RUN apt install unzip
+RUN unzip /home/user/chromedriver.zip
+
+
+
+RUN apt-get install -y ./google-chrome-stable_current_amd64.deb
+# save space
+# RUN rm google-chrome-stable_current_amd64.deb
+
+
+# clean up
+RUN apt-get autoremove -y \
+    && apt-get clean -y \
+    && apt-get autoclean -y \
+    && rm -rf /var/lib/apt/lists/*
+
+# copy bootstrap.sh
+RUN mkdir -p /opt
+COPY /bootstrap.sh /opt
+
+
+ENV HOME /home/$USER
+WORKDIR /home/$USER
+USER ${USER}
+
+RUN rustup default stable && \
+    mkdir ${HOME}/rust_playground && \
+    cd ${HOME}/rust_playground && \
+    cargo init "." && \
+    cargo build && \
+    cargo run
+
+
+
+CMD ["sh","/opt/bootstrap.sh"]
+
+# 1. create dummy project
+# 2. copy local to docker
+# 3. build inside
+# 4. run inside
+
+# RUN export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/cargo/bin"
+# RUN rustup --version; \
+#    cargo --version; \
+#    rustc --version; 
+
+
+
+
+# build 
+# cd docker_rust_hello_world &&  docker build --progress=plain -t docker_run_rust_local_inside -f Dockerfile_run_local_inside "."
+
+# run shell bash
+# docker run -it docker_run_rust_local_inside bash
+
+# run shell sh
+# docker run -it docker_run_rust_local_inside sh
