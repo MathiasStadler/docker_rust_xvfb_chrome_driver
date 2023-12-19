@@ -30,7 +30,11 @@ launch_window_manager() {
 
     # Start and wait for either fluxbox to be fully up or we hit
     # the timeout.
-    fluxbox &
+    # test
+    fluxbox -log "/root/.fluxbox/log" &
+    #sleep 10
+    # google-chrome --no-sandbox &
+
 #    local loopCount=0
 #    until wmctrl -m > /dev/null 2>&1
 #    do
@@ -66,7 +70,13 @@ run_vnc_server() {
     wait $!
 }
 
+launch_google_chrome() {
+
+/usr/bin/google-chrome --no-sandbox
+
+}
+
 launch_xvfb
 launch_window_manager
 run_vnc_server
-
+launch_google_chrome

@@ -147,8 +147,8 @@ RUN ls -l /home/user
 RUN ls -l /usr/bin
 # RUN /usr/bin/unzip /home/user/chromedriver.zip 
 
-RUN apt upgrade -yqq
-RUN apt install unzip
+RUN apt upgrade
+RUN apt install -yqq unzip curl
 RUN unzip /home/user/chromedriver.zip
 
 
@@ -164,11 +164,6 @@ RUN apt-get autoremove -y \
     && apt-get autoclean -y \
     && rm -rf /var/lib/apt/lists/*
 
-# copy bootstrap.sh
-RUN mkdir -p /opt
-COPY /bootstrap.sh /opt
-
-
 ENV HOME /home/$USER
 WORKDIR /home/$USER
 USER ${USER}
@@ -180,9 +175,15 @@ RUN rustup default stable && \
     cargo build && \
     cargo run
 
+# copy bootstrap.sh
+RUN mkdir -p /opt
+COPY /bootstrap.sh /opt
 
+RUN mkdir /home/$USER/.fluxbox
+COPY /startup /home/$USER/.fluxbox/startup
+RUN chmod +x /home/$USERuser/.fluxbox/startup
 
-CMD ["sh","/opt/bootstrap.sh"]
+CMD ["/bin/bash","/opt/bootstrap.sh"]
 
 # 1. create dummy project
 # 2. copy local to docker
