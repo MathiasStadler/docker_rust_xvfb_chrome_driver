@@ -32,8 +32,8 @@ launch_window_manager() {
     # the timeout.
     # test
     fluxbox -log "/root/.fluxbox/log" &
-    #sleep 10
-    # google-chrome --no-sandbox &
+    sleep 10
+    DISPLAY=:1 google-chrome --no-sandbox &
 
 #    local loopCount=0
 #    until wmctrl -m > /dev/null 2>&1

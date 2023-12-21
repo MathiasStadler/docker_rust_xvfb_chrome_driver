@@ -166,6 +166,12 @@ RUN apt-get autoremove -y \
 
 ENV HOME /home/$USER
 WORKDIR /home/$USER
+
+RUN mkdir /home/$USER/.fluxbox
+COPY /startup /home/$USER/.fluxbox/startup
+RUN chmod +x /home/$USER/.fluxbox/startup
+RUN chown -R $USER:$USER /home/$USER
+
 USER ${USER}
 
 RUN rustup default stable && \
@@ -179,9 +185,7 @@ RUN rustup default stable && \
 RUN mkdir -p /opt
 COPY /bootstrap.sh /opt
 
-RUN mkdir /home/$USER/.fluxbox
-COPY /startup /home/$USER/.fluxbox/startup
-RUN chmod +x /home/$USERuser/.fluxbox/startup
+
 
 CMD ["/bin/bash","/opt/bootstrap.sh"]
 
