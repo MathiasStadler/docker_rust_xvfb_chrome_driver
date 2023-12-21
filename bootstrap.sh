@@ -33,7 +33,9 @@ launch_window_manager() {
     # test
     fluxbox -log "/root/.fluxbox/log" &
     sleep 10
-    DISPLAY=:1 google-chrome --no-sandbox &
+    # export DISPLAY=$HOST_IP:1 && /usr/bin/google-chrome --no-sandbox \
+    export DISPLAY=:1 && google-chrome --no-sandbox \
+    --disable-features=Vulkan &
 
 #    local loopCount=0
 #    until wmctrl -m > /dev/null 2>&1
