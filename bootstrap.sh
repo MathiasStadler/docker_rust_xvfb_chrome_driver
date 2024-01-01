@@ -6,7 +6,9 @@ launch_xvfb() {
     # Set defaults if the user did not specify envs.
     export DISPLAY=${XVFB_DISPLAY:-:1}
     local screen=${XVFB_SCREEN:-0}
-    local resolution=${XVFB_RESOLUTION:-1280x1024x24}
+    # local resolution=${XVFB_RESOLUTION:-1280x1024x24}
+    # EIZO 
+    local resolution=${XVFB_RESOLUTION:-1920x1080x24}
     local timeout=${XVFB_TIMEOUT:-5}
 
     # Start and wait for either Xvfb to be fully up,
@@ -35,7 +37,20 @@ launch_window_manager() {
     sleep 10
     # export DISPLAY=$HOST_IP:1 && /usr/bin/google-chrome --no-sandbox \
     export DISPLAY=:1 && google-chrome --no-sandbox \
-    --disable-features=Vulkan &
+    --disable-features=Vulkan \
+    --no-first-run \
+    --no-setup \
+    --force-renderer-accessibility \
+    --enable-views-textfield \
+    --allow-file-access-from-files \
+    --disable-web-security \
+    --flag-switches-begin \
+    --flag-switches-end \
+    --disable-fre \
+    --no-default-browser-check \
+    --disable-session-crashed-bubble \
+    --start-fullscreen \
+    &
 
 #    local loopCount=0
 #    until wmctrl -m > /dev/null 2>&1

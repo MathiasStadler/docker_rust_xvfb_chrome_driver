@@ -177,6 +177,9 @@ RUN chown -R $USER:$USER /home/$USER
 
 USER ${USER}
 
+# just a try
+# SHELL ["/bin/bash", "-c"]
+
 RUN rustup default stable && \
     mkdir ${HOME}/rust_playground && \
     cd ${HOME}/rust_playground && \
