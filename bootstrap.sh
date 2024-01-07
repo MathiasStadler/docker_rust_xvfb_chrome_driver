@@ -36,21 +36,26 @@ launch_window_manager() {
     fluxbox -log "/root/.fluxbox/log" &
     sleep 10
     # export DISPLAY=$HOST_IP:1 && /usr/bin/google-chrome --no-sandbox \
-    export DISPLAY=:1 && google-chrome --no-sandbox \
-    --disable-features=Vulkan \
-    --no-first-run \
-    --no-setup \
-    --force-renderer-accessibility \
-    --enable-views-textfield \
-    --allow-file-access-from-files \
-    --disable-web-security \
-    --flag-switches-begin \
-    --flag-switches-end \
-    --disable-fre \
-    --no-default-browser-check \
-    --disable-session-crashed-bubble \
-    --start-fullscreen \
-    &
+    # export DISPLAY=:1 && google-chrome --no-sandbox \
+    # --disable-features=Vulkan \
+    # --no-first-run \
+    # --no-setup \
+    # --force-renderer-accessibility \
+    # --enable-views-textfield \
+    # --allow-file-access-from-files \
+    # --disable-web-security \
+    # --flag-switches-begin \
+    # --flag-switches-end \
+    # --disable-fre \
+    # --no-default-browser-check \
+    # --disable-session-crashed-bubble \
+    # --start-fullscreen 
+    # --log-severity=verbose \
+    # --lang=en-US \
+    # --user-data-dir=/home/user \
+    # --log-file=/opt/output/debug.log \
+    # --disable-gpu \
+    # --disable-gpu-compositing \
 
 #    local loopCount=0
 #    until wmctrl -m > /dev/null 2>&1
