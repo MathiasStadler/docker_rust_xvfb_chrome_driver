@@ -96,7 +96,9 @@ RUN apt-get install -yqq libgl1-mesa-dri \
     libpango1.0-0 \
     libpulse0 \
     libv4l-0 \
-    libcanberra-gtk-module  
+    libcanberra-gtk-module  \
+    sssd \
+    sssd-dbus
 #    libcanberra-gtk
 #    libgl1-mesa-glx
 #  
@@ -139,6 +141,12 @@ COPY /bootstrap.sh /opt
 
 # copy docker-entrypoint
 COPY docker-entrypoint.sh /
+
+# hier weiter
+
+# add to /home/user/.bashrc
+# https://dw.exitstatus0.com/doku.php?id=wiki:systemd_user_service#troubleshooting
+# systemctl start systemd-logind.service
 
 # run 
 # CMD ["/bin/bash","/opt/bootstrap.sh"]
