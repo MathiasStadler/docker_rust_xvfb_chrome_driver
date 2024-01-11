@@ -20,6 +20,10 @@ RUN mkdir /home/$USER && chown -R $USER:$USER /home/$USER
 RUN mkdir -p /etc/sudoers.d 
 RUN echo "user ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/"$USER" \
     && chmod 0440 /etc/sudoers.d/"$USER"
+#set dbus for user 
+RUN echo "export XDG_RUNTIME_DIR=/run/user/$(id -u ${USER})" > /home/${USER}/.bashrc && \
+    echo "export DBUS_SESSION_BUS_ADDRESS="unix:path=${XDG_RUNTIME_DIR}/bus"" >> /home/${USER}/.bashrc
+
 
 # install dbus
 RUN apt-get update
@@ -75,7 +79,9 @@ RUN apt-get update && apt-get install -yqq fonts-liberation \
     xdg-utils \
     libu2f-udev \
     libvulkan1 \
-    gcc
+    gcc 
+
+RUN apt-get update && apt-get install -yqq  libv4l-0 
 
 # add chrome
 # FROM HERE
@@ -91,8 +97,7 @@ RUN apt-get update && apt-get install -yqq apt-transport-https \
     xpra \
     websockify 
 
-RUN apt-get update 
-RUN apt-get install -yqq libgl1-mesa-dri \
+RUN apt-get update && apt-get install -yqq libgl1-mesa-dri \
     libpango1.0-0 \
     libpulse0 \
     libv4l-0 \
@@ -110,13 +115,15 @@ RUN apt-get install -yqq libgl1-mesa-dri \
 # https://stackoverflow.com/questions/71571296/can-i-silence-qstandardpaths-xdg-runtime-dir-not-set-defaulting-to-tmp-runti
 ENV XDG_RUNTIME_DIR=/tmp
 
+
+
+
 # download google-chrome
 # RUN echo $?
 # RUN cd /tmp && wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 # RUN curl -vsSLO https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 
 ADD download/google-chrome-stable_current_amd64.deb .
-
 
 # install google-chrome
 RUN apt-get install -yqq ./google-chrome-stable_current_amd64.deb
@@ -127,22 +134,21 @@ RUN rm google-chrome-stable_current_amd64.deb
 #start systemd
 RUN printf "systemctl start systemd-logind" >> /etc/profile
 
-
+# systemctl enable dbus.service
+# systemctl status dbus.service
+## The unit files have no installation config
 # clean up
 RUN apt-get autoremove -y \
     && apt-get clean -y \
     && apt-get autoclean -y \
     && rm -rf /var/lib/apt/lists/*
 
-
 # copy bootstrap.sh
 RUN mkdir -p /opt
 COPY /bootstrap.sh /opt
 
 # copy docker-entrypoint
-COPY docker-entrypoint.sh /
-
-# hier weiter
+COPY docker-dbus-entrypoint.sh /opt
 
 # add to /home/user/.bashrc
 # https://dw.exitstatus0.com/doku.php?id=wiki:systemd_user_service#troubleshooting
@@ -150,8 +156,8 @@ COPY docker-entrypoint.sh /
 
 # run 
 # CMD ["/bin/bash","/opt/bootstrap.sh"]
-RUN chmod +x /docker-entrypoint.sh
-ENTRYPOINT ["/docker-entrypoint.sh"]
+RUN chmod +x /opt//docker-dbus-entrypoint.sh
+ENTRYPOINT ["/opt/docker-dbus-entrypoint.sh"]
 # ENTRYPOINT ["/sbin/init"]
 
 
@@ -161,6 +167,9 @@ ENTRYPOINT ["/docker-entrypoint.sh"]
 # docker build -t ubuntu_23_10_xvfb -f Dockerfile_ubuntu_23_10_xvfb "."
 
 # docker build -t ubuntu_23_10_xvfb_dbus -f Dockerfile_ubuntu_23_10_xvfb_dbus "."
+# --progress=plain
+# docker build --progress=plain -t ubuntu_23_10_xvfb_dbus -f Dockerfile_ubuntu_23_10_xvfb_dbus "."
+
 # run
 # docker run -it -v /tmp/.X11-unix:/tmp/.X11-unix -v /var/run/dbus:/var/run/dbus -v /sys/fs/cgroup:/sys/fs/cgroup:ro --cap-add SYS_ADMIN --security-opt apparmor=unconfined --tmpfs /run ubuntu_23_10_xvfb
 
@@ -171,3 +180,9 @@ ENTRYPOINT ["/docker-entrypoint.sh"]
 
 # /w /sys/fs/cgroup/unified/docker
 # docker run -it -v /tmp/.X11-unix:/tmp/.X11-unix -v /sys/fs/cgroup/unified/docker:/sys/fs/cgroup/unified/docker -v /var/run/dbus:/var/run/dbus -v /run/dbus/system_bus_socket:/run/dbus/system_bus_socket  -v /sys/fs/cgroup:/sys/fs/cgroup:ro --cap-add SYS_ADMIN --security-opt apparmor=unconfined --tmpfs /run ubuntu_23_10_xvfb_dbus
+
+# docker run -it -v /tmp/.X11-unix:/tmp/.X11-unix -v /sys/fs/cgroup:/sys/fs/cgroup:ro --cap-add SYS_ADMIN --security-opt apparmor=unconfined --tmpfs /run ubuntu_23_10_xvfb_dbus bash
+
+#  google-chrome-stable --no-sandbox --no-first-run --disable-gpu --enable-logging=stderr -v=3 > log.txt 2>&1
+
+# google-chrome-stable --no-sandbox --no-first-run --disable-gpu --disable-features=dbus --disable-setuid-sandbox  --enable-logging=stderr -v=1 > log.txt 2>&1
