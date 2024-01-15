@@ -186,3 +186,12 @@ ENTRYPOINT ["/opt/docker-dbus-entrypoint.sh"]
 #  google-chrome-stable --no-sandbox --no-first-run --disable-gpu --enable-logging=stderr -v=3 > log.txt 2>&1
 
 # google-chrome-stable --no-sandbox --no-first-run --disable-gpu --disable-features=dbus --disable-setuid-sandbox  --enable-logging=stderr -v=1 > log.txt 2>&1
+
+
+# next step
+# docker run -it -v /tmp/.X11-unix:/tmp/.X11-unix -v /sys/fs/cgroup:/sys/fs/cgroup:ro --cap-add SYS_ADMIN --security-opt apparmor=unconfined --tmpfs /run ubuntu_23_10_xvfb_dbus bash
+
+# next step
+# docker run -it -v /tmp/.X11-unix:/tmp/.X11-unix -v /sys/fs/cgroup:/sys/fs/cgroup:ro --cap-add SYS_ADMIN --security-opt apparmor=unconfined --tmpfs /run --device /dev/snd --device /dev/dri -v /dev/shm:/dev/shm ubuntu_23_10_xvfb_dbus bash
+
+# docker run -it -v /tmp/.X11-unix:/tmp/.X11-unix -v /sys/fs/cgroup:/sys/fs/cgroup:ro --cap-add SYS_ADMIN --security-opt apparmor=unconfined --tmpfs /run --device /dev/snd --device /dev/dri -v /dev/shm:/dev/shm ubuntu_23_10_xvfb_dbus bash 
