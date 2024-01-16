@@ -95,7 +95,8 @@ RUN apt-get update && apt-get install -yqq apt-transport-https \
     mesa-utils \
     mesa-utils-extra \
     xpra \
-    websockify 
+    websockify \
+    upower
 
 RUN apt-get update && apt-get install -yqq libgl1-mesa-dri \
     libpango1.0-0 \
@@ -168,7 +169,7 @@ ENTRYPOINT ["/opt/docker-dbus-entrypoint.sh"]
 
 # docker build -t ubuntu_23_10_xvfb_dbus -f Dockerfile_ubuntu_23_10_xvfb_dbus "."
 # --progress=plain
-# docker build --progress=plain -t ubuntu_23_10_xvfb_dbus -f Dockerfile_ubuntu_23_10_xvfb_dbus "."
+# docker build --progress=plain --no-cache  -t ubuntu_23_10_xvfb_dbus -f Dockerfile_ubuntu_23_10_xvfb_dbus "."
 
 # run
 # docker run -it -v /tmp/.X11-unix:/tmp/.X11-unix -v /var/run/dbus:/var/run/dbus -v /sys/fs/cgroup:/sys/fs/cgroup:ro --cap-add SYS_ADMIN --security-opt apparmor=unconfined --tmpfs /run ubuntu_23_10_xvfb
@@ -194,4 +195,9 @@ ENTRYPOINT ["/opt/docker-dbus-entrypoint.sh"]
 # next step
 # docker run -it -v /tmp/.X11-unix:/tmp/.X11-unix -v /sys/fs/cgroup:/sys/fs/cgroup:ro --cap-add SYS_ADMIN --security-opt apparmor=unconfined --tmpfs /run --device /dev/snd --device /dev/dri -v /dev/shm:/dev/shm ubuntu_23_10_xvfb_dbus bash
 
+# this works
 # docker run -it -v /tmp/.X11-unix:/tmp/.X11-unix -v /sys/fs/cgroup:/sys/fs/cgroup:ro --cap-add SYS_ADMIN --security-opt apparmor=unconfined --tmpfs /run --device /dev/snd --device /dev/dri -v /dev/shm:/dev/shm ubuntu_23_10_xvfb_dbus bash 
+
+
+# save
+#  google-chrome-stable --no-sandbox --no-gpu --use-gl=desktop -ozone-plattform=wayland
